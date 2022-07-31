@@ -10,7 +10,7 @@ python_version = '3.9'
 pandas = '*'
 numpy = '*'
 scikit-learn = '*'
-
+coloredlogs = '*'
 tqdm = '*'
 
 [dev-packages]
