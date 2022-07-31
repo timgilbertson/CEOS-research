@@ -12,5 +12,8 @@ python harness.py
 
 Production:
 ```python
-python ceos_indices --input-images path/to/images --input-tower path/to/tower --output-path path/to/outputs
+python ceos_indices \
+    --input-images path/to/images \
+    --input-tower path/to/tower \
+    --output-path path/to/outputs \
 ```
