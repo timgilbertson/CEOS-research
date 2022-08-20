@@ -12,6 +12,8 @@ numpy = '*'
 scikit-learn = '*'
 coloredlogs = '*'
 tqdm = '*'
+google-cloud-storage = '*'
+rasterio = '*'
 
 [dev-packages]
 pdbpp = '*'
