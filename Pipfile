@@ -14,10 +14,12 @@ coloredlogs = '*'
 tqdm = '*'
 google-cloud-storage = '*'
 rasterio = '*'
+matplotlib = '*'
 
 [dev-packages]
 pdbpp = '*'
 black = '*'
+ipykernel = "*"
 
 [scripts]
 format = "python -m black ceos/ -l 119"

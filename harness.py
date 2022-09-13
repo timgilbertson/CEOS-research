@@ -3,7 +3,7 @@ from ceos_indices.generate_indices import indices
 
 def main():
     params = {
-        "input_images": "ceos_planet",
+        "input_images": "data/inputs/images/",
         "input_tower": "data/inputs/tower/",
         "output_path": "data/outputs/",
     }
