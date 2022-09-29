@@ -3,30 +3,34 @@ import os
 from google.cloud import storage
 import numpy as np
 import rasterio as rs
+from tqdm import tqdm
 
-def read_images(image_path: str, local: bool = True) -> np.array:
+def read_images(image_path: str, local: bool = False) -> np.array:
     image_arrays, date_arrays = [], []
     if local:
         for image in os.listdir(image_path):
-            images, dates = _read_tif(None, image_path + image)
+            images, dates = read_tif(image_path + image)
             image_arrays.append(images)
             date_arrays.append(dates)
     else:
         client = storage.Client()
-        bucket = client.get_bucket(image_path)
-        blob = bucket.get_blob('remote/path/to/file.txt')
+        blobs = client.list_blobs("ceos_planet", prefix="UTM-24000/16N/26E-49N/PF-SR")
+        count = 0
+        for blob in tqdm(blobs, total=len(blobs)):
+            images, dates = read_tif('gs://ceos_planet/' + blob.name)
+            image_arrays.append(np.mean(images, axis=(1, 2)))
+            date_arrays.append(dates)
+
+            count += 1
+            if count == 10:
+                break
 
     return image_arrays, date_arrays
 
 
-def _read_tif(fs, path):
+def read_tif(path):
     date = path.split("/")[-1].split(".tif")[0][-10:]
     with rs.open(path) as tif_file:
         images = tif_file.read()
-
-    if fs:
-        with fs.open(path, os.O_RDONLY) as file_obj:
-            with rs.open(path) as tif_file:
-                images = tif_file.read()
 
     return images, date
