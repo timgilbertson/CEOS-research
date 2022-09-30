@@ -42,12 +42,12 @@ def calculate_indices_distributed(storage_client: storage.Client) -> pd.DataFram
     groupings = ['gs://ceos_planet/' + blob.name for blob in blobs]
 
     dask_futures = []
-    for group in groupings[:200]:
+    for group in groupings:
         dask_futures.append(
             dask_client.submit(_indices_by_group, group)
         )
 
-    return pd.concat([fut.result() for fut in dask_futures], sort=False).reset_index(drop=True)
+    return pd.concat([fut.result() for fut in dask_futures], sort=False)
 
 
 def _indices_by_group(blob: str) -> pd.DataFrame:
