@@ -30,37 +30,27 @@ def calculate_indices(images: List[np.ndarray], dates: List[str]) -> Dict[str, L
             "low_ndvi": low_ndvi,
             "mean_nirv": mean_nirv,
             "high_nirv": high_nirv,
-            "low_nirv": low_nirv
+            "low_nirv": low_nirv,
         },
-        index=[pd.to_datetime(dates)]
+        index=[pd.to_datetime(dates)],
     )
 
 
 def _generate_ndvi(images: List[np.ndarray]) -> List[np.ndarray]:
     """Calculates NDVI.
-    
+
     NDVI: Normalized Difference Vegetative Index
         The ratio of the difference between near infrared and red reflectance to the sum of the near infrared and red
         reflectances."""
-    # ndvi = []
-    # for image in images:
-    #     image_ndvi = (image[3] - image[2]) / (image[3] + image[2])
-    #     ndvi.append(image_ndvi)
-
-    # return ndvi
-    return (images[3] - images[2]) / (images[3] + images[2])
+    band_difference = images[3] - images[2]
+    band_sum = images[3] + images[2]
+    return np.divide(band_difference, band_sum, out=np.zeros_like(band_difference, dtype=float), where=band_sum != 0)
 
 
 def _generate_nirv(images: List[np.ndarray], ndvi: List[np.ndarray]) -> List[np.ndarray]:
     """Calculates NIRv
 
     NIRv: The product of the NDVI and near infrared reflectances"""
-    # nirv = []
-    # for idx, image in enumerate(images):
-    #     image_nirv = image[3] * ndvi[idx]
-    #     nirv.append(image_nirv)
-
-    # return nirv
     return images[3] * ndvi
 
 
