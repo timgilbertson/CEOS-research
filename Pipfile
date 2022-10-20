@@ -22,7 +22,8 @@ distributed = "*"
 pdbpp = '*'
 black = '*'
 ipykernel = "*"
+bokeh = "*"
 
 [scripts]
-format = "python -m black ceos/ -l 119"
+format = "python -m black ceos_indices/ -l 119"
 test = "pytest tests"

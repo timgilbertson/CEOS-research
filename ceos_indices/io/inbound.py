@@ -1,6 +1,7 @@
 import os
 
 from google.cloud import storage
+import geopandas as gpd
 import numpy as np
 import rasterio as rs
 from rasterio.enums import Resampling
@@ -59,3 +60,8 @@ def read_tif(in_path):
             images = np.concatenate([images_w, images_e], axis=2)
 
     return images, date
+
+
+def load_sensor_locations(sensor_path: str) -> gpd.GeoDataFrame:
+    sensors = gpd.read_file(sensor_path)
+    return sensors
