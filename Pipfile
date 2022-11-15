@@ -17,6 +17,9 @@ rasterio = '*'
 matplotlib = '*'
 dask = "*"
 distributed = "*"
+geopandas = "*"
+shapely = "*"
+vds-api-client = "*"
 
 [dev-packages]
 pdbpp = '*'

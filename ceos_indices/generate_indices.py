@@ -25,7 +25,12 @@ def indices(params: Dict[str, str]):
     if params["distributed"]:
         index_frame = calculate_indices_distributed(storage_client, sensors)
     else:
-        index_frame = read_images(storage_client, sensors)
+        images, dates, sensor_values = read_images(storage_client, sensors)
+        indexes = []
+        for date in zip((images, dates, sensor_values)):
+            indexes.append(calculate_indices(date))
+        index_frame = pd.concat(indexes)
+
 
     logger.info("Validating Indices")
     run_validation(index_frame)
@@ -57,6 +62,6 @@ def calculate_indices_distributed(storage_client: storage.Client, sensors: gpd.G
 
 
 def _indices_by_group(blob: str, sensors: gpd.GeoDataFrame) -> pd.DataFrame:
-    image, date = read_tif(blob)
+    image, date, sensor_pixels = read_tif(blob, sensors)
 
-    return calculate_indices(image, date)
+    return calculate_indices(image, date, sensor_pixels)

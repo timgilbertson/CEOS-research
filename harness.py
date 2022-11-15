@@ -5,9 +5,9 @@ def main():
     params = {
         "input_images": "data/inputs/images/",
         "input_tower": "data/inputs/tower/",
-        "input_sensors": "ceos_indices/sr_sensor_plots.gpkg",
+        "sensor_locations": "ceos_indices/sr_sensor_plots.gpkg",
         "output_path": "data/outputs/",
-        "distributed": True,
+        "distributed": False,
     }
 
     indices(params)
