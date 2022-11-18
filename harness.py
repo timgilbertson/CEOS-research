@@ -7,7 +7,7 @@ def main():
         "input_tower": "data/inputs/tower/",
         "sensor_locations": "ceos_indices/sr_sensor_plots.gpkg",
         "output_path": "data/outputs/",
-        "distributed": False,
+        "distributed": True,
     }
 
     indices(params)

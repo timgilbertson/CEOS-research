@@ -1,8 +1,7 @@
 import logging, coloredlogs
 from typing import Dict
 
-from dask.diagnostics import ProgressBar
-from dask.distributed import Client, LocalCluster
+from dask.distributed import Client, LocalCluster, progress
 from google.cloud import storage
 import geopandas as gpd
 import pandas as pd
@@ -23,17 +22,17 @@ def indices(params: Dict[str, str]):
 
     logger.info("Calculating Indices")
     if params["distributed"]:
-        index_frame = calculate_indices_distributed(storage_client, sensors)
+        index_frame, sensor_indices = calculate_indices_distributed(storage_client, sensors)
     else:
         images, dates, sensor_values = read_images(storage_client, sensors)
         indexes = []
         for date in zip((images, dates, sensor_values)):
+            # TODO: FIX THIS TUPLE RETURN
             indexes.append(calculate_indices(date))
         index_frame = pd.concat(indexes)
 
-
     logger.info("Validating Indices")
-    run_validation(index_frame)
+    run_validation(index_frame, sensor_indices, params["output_path"])
 
     logger.info("Writing Results")
 
@@ -48,17 +47,24 @@ def initiate_dask_client(n_workers: int = 14, memory_limit: int = 32) -> Client:
 
 
 def calculate_indices_distributed(storage_client: storage.Client, sensors: gpd.GeoDataFrame) -> pd.DataFrame:
-    dask_client = initiate_dask_client()
-    blobs = storage_client.list_blobs("ceos_planet", prefix="UTM-24000/16N/26E-49N/PF-SR")
+    dask_client = initiate_dask_client(n_workers=16, memory_limit=64)
+    blobs = storage_client.list_blobs("ceos_planet", prefix="UTM-24000/16N/27E-49N/PF-SR")
 
     groupings = ["gs://ceos_planet/" + blob.name for blob in blobs]
 
     dask_futures = []
-    for group in groupings[:1]:
+    for group in groupings:
         dask_futures.append(dask_client.submit(_indices_by_group, group, sensors))
 
-    with ProgressBar():
-        return pd.concat([fut.result() for fut in dask_futures], sort=False)
+    average_images, sensor_indices = [], []
+    progress(dask_futures)
+    for future in dask_futures:
+        result = future.result()
+        average_images.append(result[0])
+        sensor_indices.append(result[1])
+
+    return pd.concat(average_images), pd.concat(sensor_indices)
+        
 
 
 def _indices_by_group(blob: str, sensors: gpd.GeoDataFrame) -> pd.DataFrame:
