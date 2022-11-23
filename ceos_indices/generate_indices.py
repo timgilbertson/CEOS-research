@@ -1,5 +1,7 @@
-import logging, coloredlogs
 from typing import Dict
+
+import coloredlogs
+import logging
 
 from google.cloud import storage
 

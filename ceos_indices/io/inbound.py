@@ -197,7 +197,7 @@ def read_images_distributed(
     groupings = ["gs://ceos_planet/" + blob.name for blob in blobs]
 
     dask_futures = []
-    for group in groupings[:5]:
+    for group in groupings[:15]:
         dask_futures.append(dask_client.submit(read_tif, group, sensors))
 
     image_arrays, dates, sensor_pixels = [], [], []
