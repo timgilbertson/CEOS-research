@@ -26,7 +26,10 @@ pdbpp = '*'
 black = '*'
 ipykernel = "*"
 bokeh = "*"
+pylint = "*"
+pytest = "*"
 
 [scripts]
 format = "python -m black ceos_indices/ -l 119"
-test = "pytest tests"
+test = "python -m pytest tests/"
+lint = "python -m pylint ceos_indices/ --max-line-length=120"
