@@ -2,7 +2,6 @@ import logging, coloredlogs
 from typing import Dict
 
 from google.cloud import storage
-import pandas as pd
 
 from .io.inbound import read_images_distributed, read_images, load_sensor_locations
 from .io.outbound import write_outputs
@@ -24,9 +23,6 @@ def indices(params: Dict[str, str]):
         images, dates, sensor_values = read_images_distributed(storage_client, sensors)
     else:
         images, dates, sensor_values = read_images(storage_client, sensors)
-    import pdb
-
-    pdb.set_trace()
 
     logger.info("Calculating Indices")
     index_frame, sensor_indices = calculate_indices(images, dates, sensor_values)
