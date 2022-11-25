@@ -19,27 +19,26 @@ def calculate_indices(
         pd.DataFrame: Calculated indices on entire images
         gpd.GeoDataFrame: Indices for each sensor location by date
     """
-    indices, sensors = [], []
-    for date in zip((images, dates, sensor_values)):
-        image_indices, sensor_pixels = _calculate_indices(date[0], date[1], date[2])
+    indices = []
+    for date in zip(images, dates):
+        image_indices = _calculate_indices(date[0], date[1])
         indices.append(image_indices)
-        sensors.append(sensor_pixels)
-    return pd.concat(indices), pd.concat(sensors)
+
+    sensor_indices = _assign_sensor_indices(sensor_values)
+    moving_windowed_indices = sensor_indices.groupby("name", group_keys=False).apply(_calculate_moving_average)
+
+    return pd.concat(indices), moving_windowed_indices
 
 
-def _calculate_indices(
-    images: List[np.ndarray], dates: List[str], sensor_values: pd.DataFrame
-) -> Tuple[pd.DataFrame, gpd.GeoDataFrame]:
+def _calculate_indices(images: List[np.ndarray], dates: List[str]) -> pd.DataFrame:
     """Calculates various vegetation indices from PF bands.
 
     Args:
         images (List[np.ndarray]): All images
         dates (List[str]): Corresponding image acquisition dates
-        sensor_values (pd.DataFrame): Mean pixel values at sensor locations
 
     Returns:
         pd.DataFrame: NDVI, NIRv indices by image mean
-        gpd.GeoDataFrame: NDVI, NIRv indices by sensor location
     """
     ndvi = _generate_ndvi(images)
     nirv = _generate_nirv(images, ndvi)
@@ -50,22 +49,16 @@ def _calculate_indices(
     mean_nirv = np.mean(nirv)
     high_nirv, low_nirv = _calculate_quantiles(nirv)
 
-    sensor_indices = _assign_sensor_indices(sensor_values)
-    moving_windowed_indices = sensor_indices.groupby("name").apply(_calculate_moving_average)
-
-    return (
-        pd.DataFrame(
-            {
-                "mean_ndvi": mean_ndvi,
-                "high_ndvi": high_ndvi,
-                "low_ndvi": low_ndvi,
-                "mean_nirv": mean_nirv,
-                "high_nirv": high_nirv,
-                "low_nirv": low_nirv,
-            },
-            index=[pd.to_datetime(dates)],
-        ),
-        moving_windowed_indices,
+    return pd.DataFrame(
+        {
+            "mean_ndvi": mean_ndvi,
+            "high_ndvi": high_ndvi,
+            "low_ndvi": low_ndvi,
+            "mean_nirv": mean_nirv,
+            "high_nirv": high_nirv,
+            "low_nirv": low_nirv,
+        },
+        index=[pd.to_datetime(dates)],
     )
 
 
@@ -103,7 +96,7 @@ def _generate_nirv(images: List[np.ndarray], ndvi: List[np.ndarray]) -> List[np.
 
 def _calculate_quantiles(array: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Calculate high and low standard deviation"""
-    high = np.quantile(array, 0.65)
-    low = np.quantile(array, 0.35)
+    high = np.mean(array) + np.std(array)
+    low = np.mean(array) - np.std(array)
 
     return high, low
