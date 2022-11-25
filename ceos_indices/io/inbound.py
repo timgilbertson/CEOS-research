@@ -7,7 +7,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import rasterio as rs
-from rasterio.mask import mask
 from rasterio.enums import Resampling
 from tqdm import tqdm
 
@@ -179,7 +178,7 @@ def initiate_dask_client(n_workers: int = 14, memory_limit: int = 32) -> Client:
 
 def read_images_distributed(
     storage_client: storage.Client, sensors: gpd.GeoDataFrame
-) -> Tuple[np.ndarray, List[str], gpd.GeoDataFrame]:
+) -> Tuple[np.ndarray, List[str], List[gpd.GeoDataFrame]]:
     """Read Planet Labs images from a Google Bucket distributed.
 
     Args:
@@ -189,15 +188,15 @@ def read_images_distributed(
     Returns:
         np.ndarray: Planet Labs images
         List[str]: Image dates
-        gpd.GeoDataFrame: Sensor data with average pixel values by date
+        List[gpd.GeoDataFrame]: Sensor data with average pixel values by date
     """
-    dask_client = initiate_dask_client(n_workers=1, memory_limit=64)
+    dask_client = initiate_dask_client(n_workers=16, memory_limit=64)
     blobs = storage_client.list_blobs("ceos_planet", prefix="UTM-24000/16N/27E-49N/PF-SR")
 
     groupings = ["gs://ceos_planet/" + blob.name for blob in blobs]
 
     dask_futures = []
-    for group in groupings[:15]:
+    for group in groupings:
         dask_futures.append(dask_client.submit(read_tif, group, sensors))
 
     image_arrays, dates, sensor_pixels = [], [], []
