@@ -21,16 +21,16 @@ def _plot_time_arrays(index_dict: pd.DataFrame, plot_path: str):
     fig, ax1 = plt.subplots(figsize=(15, 10))
     ax2 = ax1.twinx()
 
-    ax1.plot(index_dict["mean_ndvi"], label="NDVI", color="blue")
-    ax1.plot(index_dict["low_ndvi"], label="NDVI", color="blue", linestyle="dashed")
-    ax1.plot(index_dict["high_ndvi"], label="NDVI", color="blue", linestyle="dashdot")
+    ax1.plot(index_dict["mean_ndvi"], color="blue", label="Mean NDVI")
+    ax1.plot(index_dict["low_ndvi"], color="blue", linestyle="dashed", label="-SD NDVI")
+    ax1.plot(index_dict["high_ndvi"], color="blue", linestyle="dashdot", label="+SD NDVI")
     ax1.set_ylabel("Normalized Difference Vegetative Index")
     ax1.set_xlabel("Date")
     ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
 
-    ax2.plot(index_dict["mean_nirv"], label="NIRv", color="orange")
-    ax2.plot(index_dict["low_nirv"], label="NIRv", color="orange", linestyle="dashed")
-    ax2.plot(index_dict["high_nirv"], label="NIRv", color="orange", linestyle="dashdot")
+    ax2.plot(index_dict["mean_nirv"], color="orange", label="Mean NIRv")
+    ax2.plot(index_dict["low_nirv"], color="orange", linestyle="dashed", label="-SD NIRv")
+    ax2.plot(index_dict["high_nirv"], color="orange", linestyle="dashdot", label="+SD NIRv")
     ax2.set_ylabel("Near Infrared Radiation Reflected from Vegetation")
 
     fig.autofmt_xdate(rotation=45)
