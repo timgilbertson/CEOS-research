@@ -6,6 +6,7 @@ import logging
 from google.cloud import storage
 
 from .io.inbound import read_images_distributed, read_images, load_sensor_locations
+from .io.vandersat import read_vandersat_data
 from .io.outbound import write_outputs
 from .indices.calculate_indices import calculate_indices
 from .validation.run_validation import run_validation
@@ -19,6 +20,9 @@ def indices(params: Dict[str, str]):
 
     logger.info("Loading Sensor Locations")
     sensors = load_sensor_locations(params["sensor_locations"])
+
+    logger.info("Loading VanderSat Data")
+    read_vandersat_data(sensors)
 
     logger.info("Loading Raw Images")
     if params["distributed"]:
