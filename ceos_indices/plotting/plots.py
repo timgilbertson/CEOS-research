@@ -73,6 +73,7 @@ def _plot_vandersat(vandersat: pd.DataFrame, plot_path: str):
 
 
 def _combination_plot(vandersat: pd.DataFrame, sensor_indices: pd.DataFrame, plot_path: str):
+    """Plot a combination of soil moisture and NDVI"""
     average_vandersat = vandersat.mean(axis=1)
     average_vandersat.name = "soil_moisture"
     average_planet = sensor_indices.groupby("date").agg({"ndvi_window": "mean", "nirv_window": "mean"})
