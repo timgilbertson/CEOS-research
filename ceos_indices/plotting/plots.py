@@ -5,7 +5,9 @@ import numpy as np
 import pandas as pd
 
 
-def plot_indices(index_dict: pd.DataFrame, sensor_indices: gpd.GeoDataFrame, vandersat_data: pd.DataFrame, plot_path: str):
+def plot_indices(
+    index_dict: pd.DataFrame, sensor_indices: gpd.GeoDataFrame, vandersat_data: pd.DataFrame, plot_path: str
+):
     """Plot calculated vegetation indices.
 
     Args:
