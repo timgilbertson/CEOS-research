@@ -9,7 +9,18 @@ OUTPUT_FOLDER = 'data/inputs/vandersat'
 API_NAME = 'SM.ER-SMAP-L-DESC_V1.0_100'
 
 
-def read_vandersat_data(sensors: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def read_vandersat_data(sensors: gpd.GeoDataFrame) -> pd.DataFrame:
+    """Load time series soil moisture data from the VanderSat api.
+
+    If there are no UUIDs stored in the /uuids folder it will send an api request.
+    Note that this will need to be scheduled because the VDS turnaround on requests is often several hours.
+
+    Args:
+        sensors (gpd.GeoDataFrame): Sensor location data
+
+    Returns:
+        pd.DataFrame: Soil moisture for each sensor location by date
+    """
     client = VdsApiV2()
     client.set_outfold(OUTPUT_FOLDER)
     client = _generate_requests(client, sensors)
@@ -18,6 +29,7 @@ def read_vandersat_data(sensors: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def _reimport_vandersat(sensors: gpd.GeoDataFrame):
+    """Import the csv files written from VDS"""
     vandersat_files = []
     for filename in glob.glob(os.path.join(OUTPUT_FOLDER, '*.csv')):
         vandersat_files.append(pd.read_csv(filename, index_col=0, parse_dates=True, dayfirst=True, comment='#').pipe(_calculate_moving_average))
@@ -26,6 +38,7 @@ def _reimport_vandersat(sensors: gpd.GeoDataFrame):
 
 
 def _generate_requests(client: VdsApiV2, sensors: gpd. GeoDataFrame):
+    """Check for existing uuids or generate new ones"""
     uuid_paths = glob.glob(os.path.join(OUTPUT_FOLDER + "/uuids", '*.uuid'))
     uuids = [uuid.split("/")[-1].split(".")[0] for uuid in uuid_paths]
 
