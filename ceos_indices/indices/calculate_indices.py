@@ -65,8 +65,8 @@ def _calculate_indices(images: List[np.ndarray], dates: List[str]) -> pd.DataFra
 def _calculate_moving_average(sensor_values: pd.DataFrame, window: int = 7) -> pd.DataFrame:
     """Moving average of NDVI and NIRv by given window"""
     return sensor_values.assign(
-        ndvi_window=sensor_values["mean_ndvi"].rolling(window=window).mean(),
-        nirv_window=sensor_values["mean_nirv"].rolling(window=window).mean(),
+        ndvi_window=sensor_values["mean_ndvi"].rolling(window=window, min_periods=1).mean(),
+        nirv_window=sensor_values["mean_nirv"].rolling(window=window, min_periods=1).mean(),
     )
 
 

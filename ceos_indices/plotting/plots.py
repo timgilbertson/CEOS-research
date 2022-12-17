@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 
-def plot_indices(index_dict: pd.DataFrame, sensor_indices: gpd.GeoDataFrame, plot_path: str):
+def plot_indices(index_dict: pd.DataFrame, sensor_indices: gpd.GeoDataFrame, vandersat_data: pd.DataFrame, plot_path: str):
     """Plot calculated vegetation indices.
 
     Args:
@@ -14,6 +14,8 @@ def plot_indices(index_dict: pd.DataFrame, sensor_indices: gpd.GeoDataFrame, plo
     """
     _plot_time_arrays(index_dict, plot_path)
     _plot_sensor_indices(sensor_indices, plot_path)
+    _plot_vandersat(vandersat_data, plot_path)
+    _combination_plot(vandersat_data, sensor_indices, plot_path)
 
 
 def _plot_time_arrays(index_dict: pd.DataFrame, plot_path: str):
@@ -46,9 +48,48 @@ def _plot_sensor_indices(sensor_indices: gpd.GeoDataFrame, plot_path: str):
         sensor_group = sensor_indices[sensor_indices["name"] == sensor]
         ax1.plot(sensor_group["ndvi_window"], label=sensor)
         ax1.set_ylabel("7 Day Moving Average Normalized Difference Vegetative Index")
-        ax1.set_xlabel("date")
+        ax1.set_xlabel("Date")
         ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
 
     fig.autofmt_xdate(rotation=45)
     fig.legend()
     plt.savefig(plot_path + "sensor_indices.png")
+
+
+def _plot_vandersat(vandersat: pd.DataFrame, plot_path: str):
+    """generate soil moisture plot for individual sensor locations"""
+    fig, ax1 = plt.subplots(figsize=(15, 10))
+
+    for sensor in vandersat.columns:
+        sensor_group = vandersat[sensor].dropna()
+        ax1.plot(sensor_group, label=sensor)
+        ax1.set_ylabel("VanderSat Soil Moisture (v/v)")
+        ax1.set_xlabel("Date")
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+
+    fig.autofmt_xdate(rotation=45)
+    fig.legend()
+    plt.savefig(plot_path + "vandersat_sm.png")
+
+
+def _combination_plot(vandersat: pd.DataFrame, sensor_indices: pd.DataFrame, plot_path: str):
+    average_vandersat = vandersat.mean(axis=1)
+    average_vandersat.name = "soil_moisture"
+    average_planet = sensor_indices.groupby("date").agg({"ndvi_window": "mean", "nirv_window": "mean"})
+
+    average_values = average_planet.join(average_vandersat)
+
+    fig, ax1 = plt.subplots(figsize=(15, 10))
+    ax2 = ax1.twinx()
+
+    ax1.plot(average_values["ndvi_window"], color="blue", label="Mean 7 Day NDVI")
+    ax1.set_ylabel("Normalized Difference Vegetative Index")
+    ax1.set_xlabel("Date")
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+
+    ax2.plot(average_values["soil_moisture"], color="orange", label="Mean 7 Day Soil Moisture")
+    ax2.set_ylabel("VanderSat Soil Moisture")
+
+    fig.autofmt_xdate(rotation=45)
+    fig.legend()
+    plt.savefig(plot_path + "combination_plot.png")

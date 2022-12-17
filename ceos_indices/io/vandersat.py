@@ -1,6 +1,5 @@
 import os
 import glob
-import logging
 
 import geopandas as gpd
 import pandas as pd
@@ -21,7 +20,7 @@ def read_vandersat_data(sensors: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def _reimport_vandersat(sensors: gpd.GeoDataFrame):
     vandersat_files = []
     for filename in glob.glob(os.path.join(OUTPUT_FOLDER, '*.csv')):
-        vandersat_files.append(pd.read_csv(filename, index_col=0, parse_dates=True, dayfirst=True, comment='#'))
+        vandersat_files.append(pd.read_csv(filename, index_col=0, parse_dates=True, dayfirst=True, comment='#').pipe(_calculate_moving_average))
 
     return pd.concat(vandersat_files, axis=1).set_axis(sensors["name"].to_list(), axis=1)
 
@@ -43,3 +42,8 @@ def _generate_requests(client: VdsApiV2, sensors: gpd. GeoDataFrame):
         client.uuids = uuids
 
     return client
+
+
+def _calculate_moving_average(vandersat: pd.DataFrame, window: int = 7) -> pd.DataFrame:
+    """Moving average of VanderSat by given window"""
+    return vandersat.rolling(window=window, min_periods=1).mean()
