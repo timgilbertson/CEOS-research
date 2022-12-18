@@ -37,4 +37,5 @@ def indices(params: Dict[str, str]):
     run_validation(index_frame, sensor_indices, vandersat_data, params["output_path"])
 
     logger.info("Writing Results")
-    write_outputs(sensor_indices, params["output_path"])
+    write_outputs(sensor_indices, params["output_path"], "sensor_indices")
+    write_outputs(vandersat_data, params["output_path"], "soil_moisture")
