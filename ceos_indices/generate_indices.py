@@ -23,6 +23,7 @@ def indices(params: Dict[str, str]):
 
     logger.info("Loading VanderSat Data")
     vandersat_data = read_vandersat_data(sensors)
+    import pdb; pdb.set_trace()
 
     logger.info("Loading Raw Images")
     if params["distributed"]:

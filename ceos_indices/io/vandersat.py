@@ -6,7 +6,6 @@ import pandas as pd
 from vds_api_client import VdsApiV2
 
 OUTPUT_FOLDER = "data/inputs/vandersat"
-API_NAME = "SM.ER-SMAP-L-DESC_V1.0_100"
 
 
 def read_vandersat_data(sensors: gpd.GeoDataFrame) -> pd.DataFrame:
@@ -48,7 +47,7 @@ def _generate_requests(client: VdsApiV2, sensors: gpd.GeoDataFrame):
 
     if len(uuids) < 1:
         client.gen_time_series_requests(
-            products=[API_NAME],
+            products=["SM.ER-SMAP-L-DESC_V1.0_100", "TEFF.ER-AMSR2-DESC_V1.0_100"],
             start_time="2018-01-01",
             end_time="2022-01-01",
             lons=[sensor.coords[0][0] for sensor in sensors.geometry.to_crs("epsg:4326")],
